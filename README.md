@@ -24,13 +24,13 @@ Xray 一键安装脚本，自动搭建 6 种协议节点，支持 Reality、xhtt
 **wget 方式：**
 
 ```bash
-wget -O xray-plus.sh https://raw.githubusercontent.com/Alvin9999-newpac/Xray-Plus/main/xray-plus.sh && chmod +x xray-plus.sh && bash xray-plus.sh
+wget -O Xray-Plus.sh https://raw.githubusercontent.com/Alvin9999-newpac/Xray-Plus/main/Xray-Plus.sh && chmod +x Xray-Plus.sh && bash Xray-Plus.sh
 ```
 
 **curl 方式：**
 
 ```bash
-curl -fsSL -o xray-plus.sh https://raw.githubusercontent.com/Alvin9999-newpac/Xray-Plus/main/xray-plus.sh && chmod +x xray-plus.sh && bash xray-plus.sh
+curl -fsSL -o Xray-Plus.sh https://raw.githubusercontent.com/Alvin9999-newpac/Xray-Plus/main/Xray-Plus.sh && chmod +x Xray-Plus.sh && bash Xray-Plus.sh
 ```
 
 ---
