@@ -102,7 +102,7 @@ show_menu() {
  
   echo -e "${BOLD}${CYAN}"
   echo " ================================================"
-  echo "   Xray-Plus 管理脚本 v1.2.0"
+  echo "   Xray-Plus 管理脚本 v1.3.0"
   echo "   https://github.com/Alvin9999-newpac/Xray-Plus"
   echo -e " ================================================${PLAIN}"
   printf " %-12s ${BC}%s${PLAIN}\n"   "BBR 加速："  "$BBR"
@@ -479,10 +479,13 @@ do_install() {
   info "生成 Reality 密钥对..."
   local X25519_OUT PRK PBK
   X25519_OUT=$("${INSTALL_DIR}/xray" x25519 2>/dev/null)
-  # 兼容新版(v25.3.6+)输出格式：PrivateKey / Password
-  # 兼容旧版输出格式：Private key / Public key
+  # 兼容各版本输出格式：
+  #   旧版：  Private key: xxx  /  Public key: xxx
+  #   中版：  PrivateKey: xxx   /  Password: xxx
+  #   新版(v26.3.27+)：PrivateKey: xxx  /  Password (PublicKey): xxx
+  # 注意：新版 "Password (PublicKey):" 用 awk '{print $NF}' 可直接取最后一列，兼容所有格式
   PRK=$(echo "$X25519_OUT" | grep -E "^(Private key|PrivateKey):" | awk '{print $NF}')
-  PBK=$(echo "$X25519_OUT" | grep -E "^(Public key|Password):" | awk '{print $NF}')
+  PBK=$(echo "$X25519_OUT" | grep -E "^(Public key|Password)" | awk '{print $NF}')
  
   if [[ -z "$PRK" || -z "$PBK" ]]; then
     err "Reality 密钥生成失败，原始输出："
@@ -495,8 +498,12 @@ do_install() {
   info "生成 VLESS ENC 加密密钥..."
   local VLENC_OUT DEKEY ENKEY
   VLENC_OUT=$("${INSTALL_DIR}/xray" vlessenc 2>/dev/null)
-  DEKEY=$(echo "$VLENC_OUT" | grep '"decryption":' | sed -n '2p' | cut -d' ' -f2- | tr -d '"')
-  ENKEY=$(echo "$VLENC_OUT" | grep '"encryption":' | sed -n '2p' | cut -d' ' -f2- | tr -d '"')
+  # vlessenc 输出两段 JSON：第1段是服务端（含 decryption），第2段是客户端（含 encryption）
+  # 用 grep 取最后一次出现的对应字段值（客户端侧）
+  DEKEY=$(echo "$VLENC_OUT" | grep '"decryption":' | tail -1 | grep -oP '(?<="decryption": ")[^"]+')
+  ENKEY=$(echo "$VLENC_OUT" | grep '"encryption":' | tail -1 | grep -oP '(?<="encryption": ")[^"]+')  # 若 grep -P 不可用（如 macOS），回退到 awk
+  [[ -z "$DEKEY" ]] && DEKEY=$(echo "$VLENC_OUT" | grep '"decryption":' | tail -1 | awk -F'"' '{print $4}')
+  [[ -z "$ENKEY" ]] && ENKEY=$(echo "$VLENC_OUT" | grep '"encryption":' | tail -1 | awk -F'"' '{print $4}')
   if [[ -z "$ENKEY" || -z "$DEKEY" ]]; then
     err "vlessenc 密钥生成失败，原始输出："
     echo "$VLENC_OUT"
