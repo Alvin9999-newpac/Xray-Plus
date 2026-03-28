@@ -102,7 +102,7 @@ show_menu() {
  
   echo -e "${BOLD}${CYAN}"
   echo " ================================================"
-  echo "   Xray-Plus 管理脚本 v1.2.0"
+  echo "   Xray-Plus 管理脚本 v1.3.0"
   echo "   https://github.com/Alvin9999-newpac/Xray-Plus"
   echo -e " ================================================${PLAIN}"
   printf " %-12s ${BC}%s${PLAIN}\n"   "BBR 加速："  "$BBR"
@@ -401,7 +401,7 @@ EOF
         "security": "reality",
         "realitySettings": { "serverName": "${SNI}", "fingerprint": "chrome", "publicKey": "${PBK}", "shortId": "${SID}" },
         "xhttpSettings": { "path": "${PATH7}", "mode": "auto" },
-        "finalmask": { "quicParams": { "congestion": "force-brutal" } }
+        "finalmask": { "quicParams": { "congestion": "force-brutal", "brutalUp": 100 } }
       }
     }
 EOF
@@ -428,7 +428,7 @@ EOF
         "security": "reality",
         "realitySettings": { "serverName": "${SNI}", "fingerprint": "chrome", "publicKey": "${PBK}", "shortId": "${SID}" },
         "xhttpSettings": { "path": "${PATH8}", "mode": "auto" },
-        "finalmask": { "quicParams": { "congestion": "force-brutal" } }
+        "finalmask": { "quicParams": { "congestion": "force-brutal", "brutalUp": 100 } }
       }
     }
 EOF
@@ -517,7 +517,7 @@ do_install() {
   ok "Reality SNI：${SNI}"
  
   # 生成账号和端口
-  info "自动生成 8 个节点账号..."
+  info "自动生成 6 个节点账号..."
   local UUID1 UUID2 UUID3 UUID4 UUID5 UUID6 UUID7 UUID8
   local P1 P2 P3 P4 P5 P6 P7 P8
   local PATH1 PATH2 PATH4 PATH5 PATH6 PATH7 PATH8
