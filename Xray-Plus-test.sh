@@ -102,7 +102,7 @@ show_menu() {
  
   echo -e "${BOLD}${CYAN}"
   echo " ================================================"
-  echo "   Xray-Plus 管理脚本 v1.1.0"
+  echo "   Xray-Plus 管理脚本 v26.3.28"
   echo "   https://github.com/Alvin9999-newpac/Xray-Plus"
   echo -e " ================================================${PLAIN}"
   printf " %-12s ${BC}%s${PLAIN}\n"   "BBR 加速："  "$BBR"
