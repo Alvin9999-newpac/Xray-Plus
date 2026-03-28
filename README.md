@@ -39,7 +39,7 @@ curl -fsSL -o Xray-Plus.sh https://raw.githubusercontent.com/Alvin9999-newpac/Xr
 
 ```
  ================================================
-   Xray-Plus 管理脚本 v1.2.2
+   Xray-Plus 管理脚本 v1.6.0
    https://github.com/Alvin9999-newpac/Xray-Plus
  ================================================
  BBR 加速：  已启用
