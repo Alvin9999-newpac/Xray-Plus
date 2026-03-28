@@ -102,7 +102,7 @@ show_menu() {
  
   echo -e "${BOLD}${CYAN}"
   echo " ================================================"
-  echo "   Xray-Plus 管理脚本 v26.3.28"
+  echo "   Xray-Plus 管理脚本 v1.2.0"
   echo "   https://github.com/Alvin9999-newpac/Xray-Plus"
   echo -e " ================================================${PLAIN}"
   printf " %-12s ${BC}%s${PLAIN}\n"   "BBR 加速："  "$BBR"
@@ -121,16 +121,82 @@ show_menu() {
   read -rp " 请输入选项 [0-6]: " CHOICE
 }
  
+# ──────────── 公共客户端 JSON 片段 ────────────
+_client_header() {
+  cat <<'JSONEOF'
+{
+  "log": { "loglevel": "warning" },
+  "dns": {
+    "hosts": {
+      "dns.google":                        ["8.8.8.8","8.8.4.4","2001:4860:4860::8888","2001:4860:4860::8844"],
+      "dns.alidns.com":                    ["223.5.5.5","223.6.6.6","2400:3200::1","2400:3200:baba::1"],
+      "one.one.one.one":                   ["1.1.1.1","1.0.0.1","2606:4700:4700::1111","2606:4700:4700::1001"],
+      "1dot1dot1dot1.cloudflare-dns.com":  ["1.1.1.1","1.0.0.1","2606:4700:4700::1111","2606:4700:4700::1001"],
+      "cloudflare-dns.com":                ["104.16.249.249","104.16.248.249","2606:4700::6810:f8f9","2606:4700::6810:f9f9"],
+      "dns.cloudflare.com":                ["104.16.132.229","104.16.133.229","2606:4700::6810:84e5","2606:4700::6810:85e5"],
+      "dot.pub":                           ["1.12.12.12","120.53.53.53"],
+      "doh.pub":                           ["1.12.12.12","120.53.53.53"],
+      "dns.quad9.net":                     ["9.9.9.9","149.112.112.112","2620:fe::fe","2620:fe::9"],
+      "dns.umbrella.com":                  ["208.67.220.220","208.67.222.222","2620:119:35::35","2620:119:53::53"],
+      "engage.cloudflareclient.com":       ["162.159.192.1","2606:4700:d0::a29f:c001"]
+    },
+    "servers": [
+      { "address": "https://dns.alidns.com/dns-query", "domains": ["geosite:private"], "skipFallback": true },
+      { "address": "223.5.5.5", "domains": ["full:dns.alidns.com","full:cloudflare-dns.com"], "skipFallback": true },
+      "https://cloudflare-dns.com/dns-query"
+    ]
+  },
+  "inbounds": [
+    {
+      "tag": "socks",
+      "port": 1080,
+      "listen": "127.0.0.1",
+      "protocol": "socks",
+      "sniffing": { "enabled": true, "destOverride": ["http","tls"], "routeOnly": false },
+      "settings": { "auth": "noauth", "udp": true }
+    },
+    {
+      "tag": "http",
+      "port": 1081,
+      "listen": "127.0.0.1",
+      "protocol": "http",
+      "sniffing": { "enabled": true, "destOverride": ["http","tls"], "routeOnly": false },
+      "settings": { "auth": "noauth" }
+    }
+  ],
+JSONEOF
+}
+ 
+_client_footer() {
+  cat <<'JSONEOF'
+  ,
+  { "tag": "direct", "protocol": "freedom" },
+  { "tag": "block",  "protocol": "blackhole" }
+  ],
+  "routing": {
+    "domainStrategy": "AsIs",
+    "rules": [
+      { "type": "field", "outboundTag": "block",  "ip":     ["geoip:private"] },
+      { "type": "field", "outboundTag": "direct", "domain": ["geosite:private"] },
+      { "type": "field", "outboundTag": "proxy",  "port":   "0-65535" }
+    ]
+  }
+}
+JSONEOF
+}
+ 
 # ──────────── 配置展示 ────────────
 _show_config() {
   [[ ! -f "$CRED_FILE" ]] && { warn "未找到凭据，请先安装"; return; }
   source "$CRED_FILE"
   local IP; IP=$(get_ip)
  
+  # VMess base64 链接
   local VMESS_JSON L6
   VMESS_JSON="{\"v\":\"2\",\"ps\":\"VMess-ws\",\"add\":\"${IP}\",\"port\":\"${P6}\",\"id\":\"${UUID6}\",\"aid\":\"0\",\"net\":\"ws\",\"type\":\"none\",\"host\":\"\",\"path\":\"${PATH6}\",\"tls\":\"\"}"
   L6="vmess://$(echo -n "$VMESS_JSON" | base64 -w 0)"
  
+  # ── 分享链接汇总 ──────────────────────────────────────────
   echo -e "\n${BOLD}${GREEN} ========== 节点分享链接 ==========${PLAIN}\n"
  
   echo -e " ${BOLD}${CYAN}[1] VLESS-xhttp-Reality-Vision-enc${PLAIN}"
@@ -150,14 +216,226 @@ _show_config() {
   echo
   echo -e " ${BOLD}${CYAN}[6] VMess-ws${PLAIN}"
   echo " ${L6}"
- 
-  echo -e "\n ${BOLD}${CYAN}[7] VLESS-xhttp3-Reality-Vision-force-brutal${PLAIN}"
+  echo
+  echo -e " ${BOLD}${CYAN}[7] VLESS-xhttp3-Reality-Vision-force-brutal${PLAIN}"
   echo " vless://${UUID7}@${IP}:${P7}?security=reality&flow=xtls-rprx-vision&pbk=${PBK}&sid=${SID}&sni=${SNI}&fp=chrome&type=xhttp&path=${PATH7}&mode=auto#VLESS-xhttp3-Reality-Vision-brutal"
   echo
   echo -e " ${BOLD}${CYAN}[8] VLESS-xhttp3-Reality-Vision-force-brutal-enc${PLAIN}"
   echo " vless://${UUID8}@${IP}:${P8}?security=reality&flow=xtls-rprx-vision&pbk=${PBK}&sid=${SID}&sni=${SNI}&fp=chrome&type=xhttp&path=${PATH8}&mode=auto&encryption=${ENC}#VLESS-xhttp3-Reality-Vision-brutal-enc"
  
   echo -e "\n${BOLD}${GREEN} ==================================${PLAIN}\n"
+ 
+  # ── 客户端 config.json ────────────────────────────────────
+  echo -e "${BOLD}${GREEN} ========== 客户端 config.json ==========${PLAIN}"
+  echo -e " ${YELLOW}（socks 1080 / http 1081，私有IP直连，其余走代理）${PLAIN}\n"
+ 
+  # 节点1：VLESS-xhttp-Reality-Vision-enc
+  echo -e " ${BOLD}${CYAN}---- [1] VLESS-xhttp-Reality-Vision-enc ----${PLAIN}"
+  _client_header
+  cat <<EOF
+  "outbounds": [
+    {
+      "tag": "proxy",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [{
+          "address": "${IP}",
+          "port": ${P1},
+          "users": [{ "id": "${UUID1}", "flow": "xtls-rprx-vision", "encryption": "${ENC}" }]
+        }]
+      },
+      "streamSettings": {
+        "network": "xhttp",
+        "security": "reality",
+        "realitySettings": { "serverName": "${SNI}", "fingerprint": "chrome", "publicKey": "${PBK}", "shortId": "${SID}" },
+        "xhttpSettings": { "path": "${PATH1}", "mode": "auto" }
+      }
+    }
+EOF
+  _client_footer
+  echo
+ 
+  # 节点2：VLESS-xhttp-Reality-Vision
+  echo -e " ${BOLD}${CYAN}---- [2] VLESS-xhttp-Reality-Vision ----${PLAIN}"
+  _client_header
+  cat <<EOF
+  "outbounds": [
+    {
+      "tag": "proxy",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [{
+          "address": "${IP}",
+          "port": ${P2},
+          "users": [{ "id": "${UUID2}", "flow": "xtls-rprx-vision", "encryption": "none" }]
+        }]
+      },
+      "streamSettings": {
+        "network": "xhttp",
+        "security": "reality",
+        "realitySettings": { "serverName": "${SNI}", "fingerprint": "chrome", "publicKey": "${PBK}", "shortId": "${SID}" },
+        "xhttpSettings": { "path": "${PATH2}" }
+      }
+    }
+EOF
+  _client_footer
+  echo
+ 
+  # 节点3：VLESS-tcp-Reality-Vision
+  echo -e " ${BOLD}${CYAN}---- [3] VLESS-tcp-Reality-Vision ----${PLAIN}"
+  _client_header
+  cat <<EOF
+  "outbounds": [
+    {
+      "tag": "proxy",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [{
+          "address": "${IP}",
+          "port": ${P3},
+          "users": [{ "id": "${UUID3}", "flow": "xtls-rprx-vision", "encryption": "none" }]
+        }]
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "reality",
+        "realitySettings": { "serverName": "${SNI}", "fingerprint": "chrome", "publicKey": "${PBK}", "shortId": "${SID}" }
+      }
+    }
+EOF
+  _client_footer
+  echo
+ 
+  # 节点4：VLESS-xhttp-plain-enc（无TLS，需反代）
+  echo -e " ${BOLD}${CYAN}---- [4] VLESS-xhttp-Vision-enc（无TLS，建议套反代）----${PLAIN}"
+  _client_header
+  cat <<EOF
+  "outbounds": [
+    {
+      "tag": "proxy",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [{
+          "address": "${IP}",
+          "port": ${P4},
+          "users": [{ "id": "${UUID4}", "flow": "xtls-rprx-vision", "encryption": "${ENC}" }]
+        }]
+      },
+      "streamSettings": {
+        "network": "xhttp",
+        "security": "none",
+        "xhttpSettings": { "path": "${PATH4}", "mode": "auto" }
+      }
+    }
+EOF
+  _client_footer
+  echo
+ 
+  # 节点5：VLESS-ws-plain-enc（无TLS，需反代）
+  echo -e " ${BOLD}${CYAN}---- [5] VLESS-ws-Vision-enc（无TLS，建议套反代）----${PLAIN}"
+  _client_header
+  cat <<EOF
+  "outbounds": [
+    {
+      "tag": "proxy",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [{
+          "address": "${IP}",
+          "port": ${P5},
+          "users": [{ "id": "${UUID5}", "flow": "xtls-rprx-vision", "encryption": "${ENC}" }]
+        }]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "none",
+        "wsSettings": { "path": "${PATH5}" }
+      }
+    }
+EOF
+  _client_footer
+  echo
+ 
+  # 节点6：VMess-ws
+  echo -e " ${BOLD}${CYAN}---- [6] VMess-ws ----${PLAIN}"
+  _client_header
+  cat <<EOF
+  "outbounds": [
+    {
+      "tag": "proxy",
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [{
+          "address": "${IP}",
+          "port": ${P6},
+          "users": [{ "id": "${UUID6}", "alterId": 0, "security": "auto" }]
+        }]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "none",
+        "wsSettings": { "path": "${PATH6}" }
+      }
+    }
+EOF
+  _client_footer
+  echo
+ 
+  # 节点7：VLESS-xhttp3-Reality-Vision-force-brutal
+  echo -e " ${BOLD}${CYAN}---- [7] VLESS-xhttp3-Reality-Vision-force-brutal ----${PLAIN}"
+  _client_header
+  cat <<EOF
+  "outbounds": [
+    {
+      "tag": "proxy",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [{
+          "address": "${IP}",
+          "port": ${P7},
+          "users": [{ "id": "${UUID7}", "flow": "xtls-rprx-vision", "encryption": "none" }]
+        }]
+      },
+      "streamSettings": {
+        "network": "xhttp",
+        "security": "reality",
+        "realitySettings": { "serverName": "${SNI}", "fingerprint": "chrome", "publicKey": "${PBK}", "shortId": "${SID}" },
+        "xhttpSettings": { "path": "${PATH7}", "mode": "auto" },
+        "sockopt": { "quicParams": { "congestion": "force-brutal" } }
+      }
+    }
+EOF
+  _client_footer
+  echo
+ 
+  # 节点8：VLESS-xhttp3-Reality-Vision-force-brutal-enc
+  echo -e " ${BOLD}${CYAN}---- [8] VLESS-xhttp3-Reality-Vision-force-brutal-enc ----${PLAIN}"
+  _client_header
+  cat <<EOF
+  "outbounds": [
+    {
+      "tag": "proxy",
+      "protocol": "vless",
+      "settings": {
+        "vnext": [{
+          "address": "${IP}",
+          "port": ${P8},
+          "users": [{ "id": "${UUID8}", "flow": "xtls-rprx-vision", "encryption": "${ENC}" }]
+        }]
+      },
+      "streamSettings": {
+        "network": "xhttp",
+        "security": "reality",
+        "realitySettings": { "serverName": "${SNI}", "fingerprint": "chrome", "publicKey": "${PBK}", "shortId": "${SID}" },
+        "xhttpSettings": { "path": "${PATH8}", "mode": "auto" },
+        "sockopt": { "quicParams": { "congestion": "force-brutal" } }
+      }
+    }
+EOF
+  _client_footer
+  echo
+ 
+  echo -e "${BOLD}${GREEN} ==========================================${PLAIN}\n"
 }
  
 # ──────────── 1. 安装 ────────────
