@@ -102,7 +102,7 @@ show_menu() {
  
   echo -e "${BOLD}${CYAN}"
   echo " ================================================"
-  echo "   Xray-Plus 管理脚本 v1.3.0"
+  echo "   Xray-Plus 管理脚本 v1.5.0"
   echo "   https://github.com/Alvin9999-newpac/Xray-Plus"
   echo -e " ================================================${PLAIN}"
   printf " %-12s ${BC}%s${PLAIN}\n"   "BBR 加速："  "$BBR"
@@ -401,7 +401,7 @@ EOF
         "security": "reality",
         "realitySettings": { "serverName": "${SNI}", "fingerprint": "chrome", "publicKey": "${PBK}", "shortId": "${SID}" },
         "xhttpSettings": { "path": "${PATH7}", "mode": "auto" },
-        "finalmask": { "quicParams": { "congestion": "force-brutal", "brutalUp": 100 } }
+        "finalmask": { "quicParams": { "congestion": "force-brutal", "brutalUp": "100 mbps" } }
       }
     }
 EOF
@@ -428,7 +428,7 @@ EOF
         "security": "reality",
         "realitySettings": { "serverName": "${SNI}", "fingerprint": "chrome", "publicKey": "${PBK}", "shortId": "${SID}" },
         "xhttpSettings": { "path": "${PATH8}", "mode": "auto" },
-        "finalmask": { "quicParams": { "congestion": "force-brutal", "brutalUp": 100 } }
+        "finalmask": { "quicParams": { "congestion": "force-brutal", "brutalUp": "100 mbps" } }
       }
     }
 EOF
