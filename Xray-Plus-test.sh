@@ -102,7 +102,7 @@ show_menu() {
  
   echo -e "${BOLD}${CYAN}"
   echo " ================================================"
-  echo "   Xray-Plus 管理脚本 v1.3.0"
+  echo "   Xray-Plus 管理脚本 v1.2.0"
   echo "   https://github.com/Alvin9999-newpac/Xray-Plus"
   echo -e " ================================================${PLAIN}"
   printf " %-12s ${BC}%s${PLAIN}\n"   "BBR 加速："  "$BBR"
@@ -401,7 +401,7 @@ EOF
         "security": "reality",
         "realitySettings": { "serverName": "${SNI}", "fingerprint": "chrome", "publicKey": "${PBK}", "shortId": "${SID}" },
         "xhttpSettings": { "path": "${PATH7}", "mode": "auto" },
-        "sockopt": { "quicParams": { "congestion": "force-brutal" } }
+        "finalmask": { "quicParams": { "congestion": "force-brutal" } }
       }
     }
 EOF
@@ -428,7 +428,7 @@ EOF
         "security": "reality",
         "realitySettings": { "serverName": "${SNI}", "fingerprint": "chrome", "publicKey": "${PBK}", "shortId": "${SID}" },
         "xhttpSettings": { "path": "${PATH8}", "mode": "auto" },
-        "sockopt": { "quicParams": { "congestion": "force-brutal" } }
+        "finalmask": { "quicParams": { "congestion": "force-brutal" } }
       }
     }
 EOF
@@ -661,10 +661,7 @@ do_install() {
           "privateKey": "${PRK}",
           "shortIds": ["${SID}"]
         },
-        "xhttpSettings": { "path": "${PATH7}", "mode": "auto" },
-        "sockopt": {
-          "quicParams": { "congestion": "force-brutal" }
-        }
+        "xhttpSettings": { "path": "${PATH7}", "mode": "auto" }
       }
     },
     {
@@ -685,10 +682,7 @@ do_install() {
           "privateKey": "${PRK}",
           "shortIds": ["${SID}"]
         },
-        "xhttpSettings": { "path": "${PATH8}", "mode": "auto" },
-        "sockopt": {
-          "quicParams": { "congestion": "force-brutal" }
-        }
+        "xhttpSettings": { "path": "${PATH8}", "mode": "auto" }
       }
     }
   ],
@@ -753,11 +747,8 @@ EOF
  
   # 防火墙
   info "放行防火墙端口..."
-  for port in $P1 $P2 $P3 $P4 $P5 $P6; do
+  for port in $P1 $P2 $P3 $P4 $P5 $P6 $P7 $P8; do
     open_port "$port" tcp
-  done
-  for port in $P7 $P8; do
-    open_port "$port" udp
   done
   ok "防火墙放行完成"
  
